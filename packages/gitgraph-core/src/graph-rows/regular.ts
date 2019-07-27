@@ -41,5 +41,5 @@ export class RegularGraphRows<TNode> {
 function uniq<T>(array: T[]): T[] {
   const set = new Set<T>();
   array.forEach((value) => set.add(value));
-  return Array.from(set);
+  return Array.from<T>(set);
 }

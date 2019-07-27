@@ -17,4 +17,4 @@ export { Refs } from "./refs";
 export { MergeStyle, TemplateName, templateExtend } from "./template";
 export { Orientation } from "./orientation";
 export { BranchesPaths, Coordinate, toSvgPath } from "./branches-paths";
-export { arrowSvgPath } from "./utils";
+export { arrowSvgPath, ArrowSvgPathObject } from "./utils";

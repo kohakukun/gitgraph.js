@@ -105,6 +105,30 @@ function withoutUndefinedKeys<T extends object>(
   );
 }
 
+export interface GetAlphaObject {
+  spacing: number;
+  orientation: Orientation;
+  isVertical: boolean;
+  reverseArrow: boolean;
+}
+
+export interface ArrowSvgPathObject extends GetAlphaObject {
+  arrowSize: number;
+  arrowOffset: number;
+}
+
+function isAlphaObject(obj: any): obj is GetAlphaObject {
+  return obj.hasOwnProperty("spacing");
+}
+
+function isArrowSvgPathObject(obj: any): obj is ArrowSvgPathObject {
+  return (
+    isAlphaObject(obj) &&
+    obj.hasOwnProperty("arrowSize") &&
+    obj.hasOwnProperty("arrowOffset")
+  );
+}
+
 /**
  * Return a string ready to use in `svg.path.d` to draw an arrow from params.
  *
@@ -113,13 +137,19 @@ function withoutUndefinedKeys<T extends object>(
  * @param commit Target commit
  */
 function arrowSvgPath<TNode = SVGElement>(
-  graph: GitgraphCore<TNode>,
+  graph: GitgraphCore<TNode> | ArrowSvgPathObject,
   parent: Coordinate,
   commit: Commit<TNode>,
 ): string {
   const commitRadius = commit.style.dot.size;
-  const size = graph.template.arrow.size!;
-  const h = commitRadius + graph.template.arrow.offset;
+  const size = isArrowSvgPathObject(graph)
+    ? graph.arrowSize
+    : graph.template.arrow.size!;
+  const h =
+    commitRadius +
+    (isArrowSvgPathObject(graph)
+      ? graph.arrowOffset
+      : graph.template.arrow.offset);
 
   // Delta between left & right (radian)
   const delta = Math.PI / 7;
@@ -147,13 +177,23 @@ function arrowSvgPath<TNode = SVGElement>(
 }
 
 function getAlpha<TNode = SVGElement>(
-  graph: GitgraphCore<TNode>,
+  graph: GitgraphCore<TNode> | GetAlphaObject,
   parent: Coordinate,
   commit: Commit<TNode>,
 ): number {
+  const spacing = isAlphaObject(graph)
+    ? graph.spacing
+    : graph.template.commit.spacing;
+  const orientation = isAlphaObject(graph)
+    ? graph.orientation
+    : graph.orientation;
+  const isVertical = isAlphaObject(graph) ? graph.isVertical : graph.isVertical;
+  const reverseArrow = isAlphaObject(graph)
+    ? graph.reverseArrow
+    : graph.reverseArrow;
   const deltaX = parent.x - commit.x;
   const deltaY = parent.y - commit.y;
-  const commitSpacing = graph.template.commit.spacing;
+  const commitSpacing = spacing;
 
   let alphaY;
   let alphaX;
@@ -169,7 +209,7 @@ function getAlpha<TNode = SVGElement>(
   //
   // So we can to default to commit spacing.
   // For horizontal orientation => same with commit X position.
-  switch (graph.orientation) {
+  switch (orientation) {
     case Orientation.Horizontal:
       alphaY = deltaY;
       alphaX = -commitSpacing;
@@ -200,13 +240,13 @@ function getAlpha<TNode = SVGElement>(
   // o
   //
   // For horizontal orientation => same with commit Y position.
-  if (graph.isVertical) {
+  if (isVertical) {
     if (Math.abs(deltaY) > commitSpacing) alphaX = 0;
   } else {
     if (Math.abs(deltaX) > commitSpacing) alphaY = 0;
   }
 
-  if (graph.reverseArrow) {
+  if (reverseArrow) {
     alphaY *= -1;
     alphaX *= -1;
   }
