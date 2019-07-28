@@ -88,7 +88,7 @@ class Gitgraph extends React.Component<GitgraphProps, GitgraphState> {
         arrowSize={this.gitgraph.template.arrow.size}
         arrowColor={this.gitgraph.template.arrow.color}
         arrowOffset={this.gitgraph.template.arrow.offset}
-        branchLabelOnEveryCommit={false}
+        branchLabelOnEveryCommit={this.gitgraph.branchLabelOnEveryCommit}
         dotSize={this.gitgraph.template.commit.dot.size}
         mergeStyle={this.gitgraph.template.branch.mergeStyle}
         mode={this.gitgraph.mode}
